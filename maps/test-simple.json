@@ -5,13 +5,13 @@
   "sources": {
     "ne-test": {
       "type": "vector",
-      "tiles": ["../ne-test/{z}/{x}/{y}.pbf"],
+      "tiles": ["https://ubukawa.github.io/VT-test-0614/ne-test/{z}/{x}/{y}.pbf"],
       "minzoom": 0,
       "maxzoom": 5
     }
   },
-  "sprite": "../sprite/sprite",
-  "glyphs": "../font/{fontstack}/{range}.pbf",
+  "sprite": "https://ubukawa.github.io/VT-test-0614/sprite/sprite",
+  "glyphs": "https://ubukawa.github.io/VT-test-0614/font/{fontstack}/{range}.pbf",
   "layers": [
     {
       "id": "background",
