@@ -1,0 +1,62 @@
+{
+  "version": 8,
+  "name": "test-simple",
+  "metadata": {"maputnik:renderer": "mbgljs"},
+  "sources": {
+    "ne-test": {
+      "type": "vector",
+      "tiles": ["../ne-test/{z}/{x}/{y}.pbf"],
+      "minzoom": 0,
+      "maxzoom": 5
+    }
+  },
+  "sprite": "../sprite/sprite",
+  "glyphs": "../font/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "background",
+      "type": "background",
+      "maxzoom": 5,
+      "paint": {"background-color": "rgba(135, 188, 196, 1)"}
+    },
+    {
+      "id": "landmass",
+      "type": "fill",
+      "source": "ne-test",
+      "source-layer": "landmass",
+      "maxzoom": 5,
+      "paint": {"fill-color": "rgba(174, 255, 147, 1)"}
+    },
+    {
+      "id": "coastline",
+      "type": "line",
+      "source": "ne-test",
+      "source-layer": "coastl",
+      "maxzoom": 5,
+      "paint": {"line-color": "rgba(58, 0, 160, 1)"}
+    },
+    {
+      "id": "bndl",
+      "type": "line",
+      "source": "ne-test",
+      "source-layer": "bndl",
+      "maxzoom": 5,
+      "paint": {"line-color": "rgba(138, 138, 138, 1)"}
+    },
+    {
+      "id": "popp",
+      "type": "symbol",
+      "source": "ne-test",
+      "source-layer": "popp",
+      "minzoom": 2,
+      "maxzoom": 5,
+      "layout": {
+        "text-font": ["sans"],
+        "text-field": "{NAME}",
+        "icon-image": "national_capital",
+        "text-offset": [1, 1]
+      }
+    }
+  ],
+  "id": "o8m1gme9z"
+}

@@ -1,0 +1,199 @@
+﻿<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>test</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.16/esri/themes/dark/main.css" />
+  <script src="https://js.arcgis.com/4.16/"></script>
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+
+  <script>
+    require([
+      "esri/config",
+      "esri/Map",
+      "esri/portal/Portal",
+      "esri/views/MapView",
+      "esri/Basemap",
+      "esri/widgets/Expand",
+      "esri/widgets/Search",
+      "esri/widgets/BasemapGallery",
+      "esri/widgets/BasemapGallery/support/LocalBasemapsSource",
+      "esri/layers/WebTileLayer",
+      "esri/layers/TileLayer",
+      "esri/layers/VectorTileLayer",
+      "esri/intl",
+      "dojo/domReady!"
+    ], function(
+        esriConfig,
+        Map,
+        Portal,
+        MapView,
+        Basemap,
+        Expand,
+        Search,
+        BasemapGallery,
+        LocalBasemapsSource,
+        WebTileLayer,
+        TileLayer,
+        VectorTileLayer,
+        intl
+    ) {
+        // ******************************************************************************
+        // https://community.esri.com/t5/arcgis-%E9%96%8B%E7%99%BA%E8%80%85%E3%82%B3%E3%83%9F%E3%83%A5%E3%83%8B%E3%83%86%E3%82%A3-documents/%E5%9C%B0%E7%90%86%E9%99%A2%E5%9C%B0%E5%9B%B3vector-%E4%BB%AE%E7%A7%B0-%E3%82%92arcgis-%E3%81%A7%E8%A1%A8%E7%A4%BA%E3%81%97%E3%81%A6%E3%81%BF%E3%81%BE%E3%81%97%E3%81%9F-%E7%AC%AC2%E5%BC%BE/ta-p/906742
+        // ******************************************************************************
+        
+        // UI
+        intl.setLocale("en");
+        
+        // culture and region
+        const selfUrl = "https://www.arcgis.com/sharing/rest/portals/self";
+        esriConfig.request.interceptors.push({
+          urls: selfUrl,
+          before: function(params) {
+            if (params.requestOptions.query) {
+                switch(intl.getLocale())
+                {
+                    case "en":
+                        params.requestOptions.query.culture="en";
+                        params.requestOptions.query.region="US";
+                        break;
+                    case "ja":
+                        params.requestOptions.query.culture="ja";
+                        params.requestOptions.query.region="JP";
+                        break;
+                    case "de":
+                        params.requestOptions.query.culture="de";
+                        params.requestOptions.query.region="DE";
+                        break;
+                    case "fr":
+                        params.requestOptions.query.culture="fr";
+                        params.requestOptions.query.region="FR";
+                        break;
+                }
+            }
+          }
+        });
+        
+        // portal
+        const portal = new Portal();
+        //portal.authMode = "immediate"; // may need to login
+        
+        portal
+            .load()
+            .then(function() {
+                const basemap = portal.useVectorBasemaps
+                    ? portal.defaultVectorBasemap
+                    : portal.defaultBasemap;
+
+                const esriTopo = basemap;
+                esriTopo.thumbnailUrl = "https://js.arcgis.com/4.16/esri/images/basemap/topo.jpg";
+
+                const stdMap = new Basemap({
+                    baseLayers:[new WebTileLayer({
+                      urlTemplate: "https://cyberjapandata.gsi.go.jp/xyz/std/{level}/{col}/{row}.png",
+                      copyright: "GSI tile https://maps.gsi.go.jp/development/ichiran.html"
+                    })],
+                    title: "GSI tile - Raster sample",
+                    id: "stdmap",
+                    thumbnailUrl: "https://cyberjapandata.gsi.go.jp/xyz/std/12/3637/1612.png"
+                });     
+
+              
+                const testMap = new Basemap({
+                    baseLayers:[new VectorTileLayer({
+                      url: "./test-simple.json",
+                      copyright: "test"
+                    })],
+                    title: "natural earth - test",
+                    id: "testmap"
+                });                
+
+               
+                const map = new Map({
+                    basemap: testMap
+                    //basemap: stdMap
+                    //basemap: basemap
+                    //basemap: "osm"
+                });
+                const view = new MapView({
+                    container: "viewDiv",
+                    map: map,
+                    center: [0, 0], 
+                    zoom: 2,
+                    constraints: { 
+                        minZoom: 0,
+                        maxZoom: 4
+                    }
+                });
+                
+
+
+                
+                // Basemap Sources を LocalBasemapsSource 
+                const localSource = new LocalBasemapsSource({
+                    basemaps: [stdMap, testMap, esriTopo]
+                });
+                
+                // Basemap Gallery Widget に LocalBasemapsSource を設定
+                const basemapGallery = new BasemapGallery({
+                    view: view,
+                    container: document.createElement("div"),
+                    source: localSource
+                });
+                
+                // Basemap Gallery Widget – Expand Button
+                const bgExpand = new Expand({
+                    view: view,
+                    content: basemapGallery
+                });
+                view.ui.add(bgExpand, "bottom-left");
+                
+                const search = new Search({ view: view });
+                view.ui.add(search, "top-right");
+                
+                const coordsWidget = document.createElement("div");
+                coordsWidget.id = "coordsWidget";
+                coordsWidget.className = "esri-widget esri-component";
+                coordsWidget.style.padding = "7px 15px 5px";
+                view.ui.add(coordsWidget, "bottom-right");
+            
+                // lat, lon, zoom and scale の更新するfunction を定義
+                function showCoordinates(pt) {
+                    let coords = "Lat/Lon " + pt.latitude.toFixed(3) + " " + pt.longitude.toFixed(3) +
+                                " | Scale 1:" + Math.round(view.scale * 1) / 1 +
+                                " | Zoom " + view.zoom;
+                    coordsWidget.innerHTML = coords;
+                }
+            
+                // view の動作がが終了したタイミングで中心座標を表示するためのイベントを追加 （例えば zoom, pan などのイベント）
+                view.watch(["stationary"], function() {
+                    showCoordinates(view.center);
+                });
+                
+                // クリックやムーブ時のマウスの座標を表示するためにイベントを追加
+                view.on(["pointer-down","pointer-move"], function(evt) {
+                    showCoordinates(view.toMap({ x: evt.x, y: evt.y }));
+                });
+                
+            })
+            .catch(function(error) {
+                console.warn(error);
+            });
+        });
+  </script>
+</head>
+<body>
+  <div id="viewDiv"></div>
+</body>
+
+</html>
