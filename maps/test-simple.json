@@ -17,7 +17,7 @@
       "id": "background",
       "type": "background",
       "maxzoom": 5,
-      "paint": {"background-color": "rgba(135, 188, 196, 1)"}
+      "paint": {"background-color": "rgba(0, 0, 0, 1)"}
     },
     {
       "id": "landmass",
